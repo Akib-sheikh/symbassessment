@@ -1,0 +1,59 @@
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.util.List;
+
+public class TipTopTest {
+
+    public static void main(String[] args) {
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver"); 
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            driver.get("https://d3pv22lioo8876.cloudfront.net/tiptop/");
+
+            // Test Case 1: Verify that the text input element with xpath .//input[@name='my-disabled'] is disabled in the form
+            WebElement disabledInput = driver.findElement(By.xpath("//*[@name='my-disabled']"));
+            Assert.assertFalse("Test Case 1 Failed: 'my-disabled' input is not disabled", disabledInput.isEnabled());
+
+            // Test Case 2: Verify that the text input with value 'Readonly input' is in readonly state by using 2 xpaths
+            WebElement readonlyInput1 = driver.findElement(By.xpath(".//input[@value='Readonly input']"));
+            WebElement readonlyInput2 = driver.findElement(By.xpath("//input[@readonly and @value='Readonly input']"));
+            assert readonlyInput1.isDisplayed() && readonlyInput2.isDisplayed() : "Test Case 2 Failed: 'Readonly input' is not readonly";
+
+            // Test Case 3: Verify that the dropdown field to select color is having 8 elements using 2 xpaths
+            WebElement colorDropdown1 = driver.findElement(By.xpath("//label[normalize-space(text())="Select Color"]"));
+            List<WebElement> colorOptions1 = colorDropdown1.findElements(By.tagName("option"));
+            WebElement colorDropdown2 = driver.findElement(By.xpath("//select[@name='my-select']/option"));
+            List<WebElement> colorOptions2 = colorDropdown2.findElements(By.xpath("option"));
+            assert colorOptions1.size() == 8 && colorOptions2.size() == 8 : "Test Case 3 Failed: Color dropdown does not have 8 elements";
+
+            // Test Case 4: Verify that the submit button is disabled when no data is entered in Name field
+            WebElement submitButton = driver.findElement(By.xpath("//button[@type='submit']"));
+            assert !submitButton.isEnabled() : "Test Case 4 Failed: Submit button is enabled when no data is entered in Name field";
+
+            // Test Case 5: Verify that the submit button enabled when both Name and Password field is entered
+            WebElement nameField = driver.findElement(By.xpath("//input[@id='my-name-id']"));
+            nameField.sendKeys("Mohammed Akib");
+            WebElement passwordField = driver.findElement(By.xpath("//input[@id='my-password-id']"));
+            passwordField.sendKeys("SymbTech123!");
+            assert submitButton.isEnabled() : "Test Case 5 Failed: Submit button is not enabled when both Name and Password field is entered";
+
+            // Test Case 6: Verify that on submit of 'Submit' button the page shows 'Received' text
+            submitButton.click();
+            WebElement receivedText = driver.findElement(By.xpath("//p[text()='Received!']"));
+            assert receivedText.isDisplayed() : "Test Case 6 Failed: 'Received' text is not displayed after form submission";
+
+            // Test Case 7: Verify that on submit of form all the data passed to the URL
+            String currentUrl = driver.getCurrentUrl();
+            assert currentUrl.contains("name=Mohammed Akib") && currentUrl.contains("password=SymbTech123!") : "Test Case 7 Failed: Form data is not passed to the URL";
+
+            System.out.println("All test cases passed successfully!");
+
+        } finally {
+            driver.quit();
+        }
+    }
+}
